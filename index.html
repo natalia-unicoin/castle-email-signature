@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>E-mail Signature — Castle</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root{
+    --bg: #ffffff;
+    --bg-panel: #ffffff;
+    --field-bg: #f9f9f9;
+    --border: #e6dbec;
+    --ink: #241a2c;
+    --ink-soft: #6b5c76;
+    --purple: #7b2a8c;
+    --purple-deep: #5c1f6a;
+    --orchid: #a855c7;
+    --orchid-soft: #f1e2f7;
+    --success: #2f9e63;
+    --shadow: 0 1px 2px rgba(93,31,106,0.06), 0 8px 24px rgba(93,31,106,0.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #1a1420;
+      --bg-panel: #241c2c;
+      --field-bg: #241c2c;
+      --border: #3a2d44;
+      --ink: #f1e9f5;
+      --ink-soft: #b6a5c2;
+      --purple: #d68fe6;
+      --purple-deep: #f0c9fa;
+      --orchid: #c98be0;
+      --orchid-soft: #33253c;
+      --success: #6cd6a0;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #1a1420;
+    --bg-panel: #241c2c;
+    --field-bg: #241c2c;
+    --border: #3a2d44;
+    --ink: #f1e9f5;
+    --ink-soft: #b6a5c2;
+    --purple: #d68fe6;
+    --purple-deep: #f0c9fa;
+    --orchid: #c98be0;
+    --orchid-soft: #33253c;
+    --success: #6cd6a0;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  *{ box-sizing: border-box; }
+  html, body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  .wrap{ max-width: 1080px; margin: 0 auto; padding: 40px 24px 64px; }
+
+  header.top{ margin-bottom: 32px; }
+  .brand-line{ display:flex; align-items:center; gap:10px; }
+  .brand-line img{ height: 20px; width:auto; display:block; }
+  h1{
+    font-family:'Inter', sans-serif; font-weight:800; letter-spacing:-0.01em;
+    font-size: clamp(24px, 3vw, 32px); margin: 6px 0 6px;
+  }
+  .sub{ color: var(--ink-soft); font-size: 14.5px; max-width: 46ch; line-height:1.5; }
+
+  .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items:start; }
+  @media (max-width: 820px){ .grid{ grid-template-columns: 1fr; } }
+
+  .panel{
+    background: var(--bg-panel); border:1px solid var(--border); border-radius: 16px;
+    padding: 28px; box-shadow: var(--shadow);
+  }
+  .panel h2{ font-size:16px; font-weight:700; margin:0 0 4px; }
+  .panel .hint{ color:var(--ink-soft); font-size:13px; margin: 0 0 20px; line-height:1.5; }
+
+  label{ display:block; font-size:13px; font-weight:600; color: var(--ink-soft); margin: 16px 0 6px; }
+  label:first-of-type{ margin-top:0; }
+  input[type="text"], input[type="email"]{
+    width:100%; padding: 10px 12px; border-radius:10px; border:1px solid var(--border);
+    background: var(--field-bg); color: var(--ink); font: inherit; font-size:14.5px;
+  }
+  input[type="text"]:focus, input[type="email"]:focus{ outline: 2px solid var(--orchid); outline-offset:1px; }
+
+  .photo-row{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .photo-preview{
+    width:72px; height:72px; border-radius:50%; background: var(--orchid-soft);
+    border:1px solid var(--border); overflow:hidden; flex:none;
+    display:flex; align-items:center; justify-content:center; color:var(--orchid); font-size:11px; text-align:center;
+  }
+  .photo-preview img{ width:100%; height:100%; object-fit:cover; }
+  .file-btn{
+    border:1px dashed var(--border); border-radius:10px; padding:10px 14px; font-size:13.5px; font-weight:600;
+    color: var(--purple); cursor:pointer; background:transparent; font-family:inherit;
+  }
+  .file-btn:hover{ background: var(--orchid-soft); }
+  .file-btn.secondary-file{ font-weight:500; color: var(--ink-soft); }
+  input[type="file"]{ display:none; }
+
+  /* crop modal */
+  .crop-overlay{
+    position:fixed; inset:0; background: rgba(20,10,24,0.55); display:flex; align-items:center; justify-content:center;
+    z-index:100; padding:20px;
+  }
+  .crop-modal{
+    background: var(--bg-panel); border-radius:16px; padding:24px; width:100%; max-width:420px;
+    box-shadow: var(--shadow); display:flex; flex-direction:column; align-items:center; gap:16px;
+  }
+  .crop-modal h3{ font-size:15px; font-weight:700; margin:0; align-self:flex-start; }
+  .crop-modal .crop-hint{ font-size:12.5px; color:var(--ink-soft); align-self:flex-start; margin-top:-10px; }
+  .crop-stage{
+    position:relative; touch-action:none; background:#111; border-radius:8px; overflow:hidden;
+    max-width:100%; line-height:0;
+  }
+  .crop-stage img{ display:block; max-width:100%; user-select:none; -webkit-user-drag:none; }
+  .crop-box{
+    position:absolute; border:2px solid #fff; box-shadow:0 0 0 9999px rgba(0,0,0,.55);
+    border-radius:50%; cursor:move; box-sizing:border-box; touch-action:none;
+  }
+  .crop-handle{
+    position:absolute; width:16px; height:16px; right:-8px; bottom:-8px;
+    background:#fff; border:2px solid var(--purple); border-radius:50%; cursor:nwse-resize; touch-action:none;
+  }
+  .crop-actions{ display:flex; gap:10px; width:100%; justify-content:flex-end; }
+
+  .actions{ display:flex; gap:10px; margin-top:24px; flex-wrap:wrap; }
+  button.primary{
+    background: var(--purple); color:#fff; border:none; border-radius:10px; padding: 12px 20px;
+    font: inherit; font-weight:700; font-size:14px; cursor:pointer; transition: background .15s, transform .1s;
+  }
+  button.primary:hover{ background: var(--purple-deep); }
+  button.primary:active{ transform: translateY(1px); }
+  button.secondary{
+    background: transparent; color: var(--purple); border:1px solid var(--border); border-radius:10px;
+    padding: 12px 18px; font: inherit; font-weight:700; font-size:14px; cursor:pointer;
+  }
+  button.secondary:hover{ background: var(--orchid-soft); }
+  button:disabled{ opacity:.5; cursor:not-allowed; }
+
+  .status{ font-size:13px; margin-top:12px; display:none; align-items:center; gap:6px; }
+  .status.show{ display:flex; }
+  .status.ok{ color: var(--success); }
+  .status.err{ color: #c0392b; }
+
+  .preview-card{
+    background: #fff; border-radius: 14px; border:1px solid var(--border);
+    padding: 22px; box-shadow: var(--shadow);
+  }
+  .preview-label{ font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color: var(--ink-soft); margin-bottom:14px; }
+
+  .gmail-tip{
+    margin-top:18px; padding:14px 16px; border-radius:12px; background: var(--orchid-soft);
+    font-size:13px; color: var(--ink); line-height:1.6;
+  }
+  .gmail-tip b{ color: var(--purple); }
+
+  [hidden]{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand-line">
+      <img src="data:image/png;base64,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" alt="Castle" />
+    </div>
+    <h1>E-mail Signature</h1>
+    <p class="sub">Completá tus datos, subí tu foto y copiá tu firma directamente en la configuración de Gmail. Cada firma queda con el mismo diseño de marca.</p>
+  </header>
+
+  <section id="viewGenerate">
+    <div class="grid">
+      <div class="panel">
+        <h2>Tus datos</h2>
+        <p class="hint">Se usan solo para armar tu firma — no se guardan en ningún lado.</p>
+
+        <label for="fName">Nombre y apellido</label>
+        <input type="text" id="fName" placeholder="Ej: Silvina Moschini" />
+
+        <label for="fTitle">Cargo</label>
+        <input type="text" id="fTitle" placeholder="Ej: Founder & CEO" />
+
+        <label for="fEmail">Email</label>
+        <input type="email" id="fEmail" placeholder="Ej: nombre@buildyourcastle.ai" />
+
+        <label>Foto</label>
+        <div class="photo-row">
+          <div class="photo-preview" id="photoPreview">Sin foto</div>
+          <button type="button" class="file-btn" id="photoBtn">Subir foto</button>
+          <button type="button" class="file-btn secondary-file" id="recropBtn" hidden>Recortar de nuevo</button>
+          <button type="button" class="file-btn secondary-file" id="removePhotoBtn" hidden>Eliminar foto</button>
+          <input type="file" id="photoInput" accept="image/*" />
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="copyBtn" type="button">Copiar firma</button>
+          <button class="secondary" id="saveBtn" type="button" hidden>Guardar en el registro del equipo</button>
+        </div>
+        <div class="status" id="statusMsg"></div>
+
+        <div class="gmail-tip">
+          <b>Cómo pegarla en Gmail:</b> Configuración (⚙️) → Ver toda la configuración → pestaña General → sección Firma → creá o elegí una firma → hacé clic dentro del cuadro y pegá (Ctrl/Cmd + V).
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <div class="preview-label">Vista previa</div>
+        <div id="sigPreview"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="crop-overlay" id="cropOverlay" hidden>
+  <div class="crop-modal">
+    <h3>Recortá tu foto</h3>
+    <p class="crop-hint">Arrastrá el círculo para moverlo y tirá del punto para agrandarlo o achicarlo.</p>
+    <div class="crop-stage" id="cropStage">
+      <img id="cropImgEl" alt="" />
+      <div class="crop-box" id="cropBox">
+        <div class="crop-handle" id="cropHandle"></div>
+      </div>
+    </div>
+    <div class="crop-actions">
+      <button type="button" class="secondary" id="cropCancel">Cancelar</button>
+      <button type="button" class="primary" id="cropApply">Usar esta foto</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ── Registro en Google Sheets (opcional) ──────────────────────────────
+  // 1. Creá una Google Sheet con la fila de encabezado: Fecha | Nombre | Cargo | Email
+  // 2. Extensiones → Apps Script, pegá el código que te dimos (doPost) y guardá.
+  // 3. Implementar → Nueva implementación → tipo "Aplicación web".
+  //    Ejecutar como: Yo. Quién tiene acceso: Cualquier usuario.
+  // 4. Copiá la URL que te da (termina en /exec) y pegala acá abajo:
+  const SHEET_WEBHOOK_URL = ""; // ej: "https://script.google.com/macros/s/AKfycb.../exec"
+
+  const LOGO = document.querySelector('.brand-line img').src;
+  const PURPLE = "#7E2F82";
+  const ORCHID = "#A03FA3";
+  const PHOTO_SIZE = 110;
+  const LOGO_WIDTH = 118;
+
+  const state = { name:"", title:"", email:"", photo:null };
+  let pendingImg = null; // Image object awaiting crop
+  const MAX_STAGE = 360; // max displayed size (px) of the image inside the crop modal
+  const MIN_BOX = 60;    // smallest allowed crop selection (px, in displayed coordinates)
+  const box = { left:0, top:0, size:0 };
+  let dragMode = null; // 'move' | 'resize' | null
+  let dragStart = { x:0, y:0, left:0, top:0, size:0 };
+
+  const els = {
+    name: document.getElementById('fName'),
+    title: document.getElementById('fTitle'),
+    email: document.getElementById('fEmail'),
+    photoInput: document.getElementById('photoInput'),
+    photoBtn: document.getElementById('photoBtn'),
+    recropBtn: document.getElementById('recropBtn'),
+    removePhotoBtn: document.getElementById('removePhotoBtn'),
+    photoPreview: document.getElementById('photoPreview'),
+    cropOverlay: document.getElementById('cropOverlay'),
+    cropStage: document.getElementById('cropStage'),
+    cropImgEl: document.getElementById('cropImgEl'),
+    cropBox: document.getElementById('cropBox'),
+    cropHandle: document.getElementById('cropHandle'),
+    cropCancel: document.getElementById('cropCancel'),
+    cropApply: document.getElementById('cropApply'),
+    sigPreview: document.getElementById('sigPreview'),
+    copyBtn: document.getElementById('copyBtn'),
+    saveBtn: document.getElementById('saveBtn'),
+    status: document.getElementById('statusMsg'),
+  };
+
+  if (SHEET_WEBHOOK_URL) els.saveBtn.hidden = false;
+
+  function escapeHtml(s){
+    return String(s || "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function buildSignatureHtml(data){
+    const name = escapeHtml(data.name || "Tu nombre");
+    const title = escapeHtml(data.title || "Tu cargo");
+    const email = escapeHtml(data.email || "tu@buildyourcastle.ai");
+    const photo = data.photo;
+    const photoCell = photo
+      ? `<img src="${photo}" width="${PHOTO_SIZE}" height="${PHOTO_SIZE}" style="display:block;width:${PHOTO_SIZE}px;height:${PHOTO_SIZE}px;border-radius:50%;object-fit:cover;" alt="${name}" />`
+      : `<div style="width:${PHOTO_SIZE}px;height:${PHOTO_SIZE}px;border-radius:50%;background:#f1e2f7;"></div>`;
+    return `<table cellpadding="0" cellspacing="0" role="presentation" style="font-family:Arial,Helvetica,sans-serif;border-collapse:collapse;">
+  <tr>
+    <td style="padding-right:20px;vertical-align:middle;">${photoCell}</td>
+    <td style="vertical-align:middle;">
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:700;color:${PURPLE};line-height:1.3;">${name}</div>
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:600;color:${ORCHID};line-height:1.4;">${title}</div>
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:400;color:#010101;line-height:1.5;">${email}</div>
+      <a href="https://buildyourcastle.ai/" style="display:inline-block;margin-top:8px;text-decoration:none;border:0;"><img src="${LOGO}" alt="Castle" width="${LOGO_WIDTH}" style="display:block;border:0;" /></a>
+    </td>
+  </tr>
+</table>`;
+  }
+
+  function render(){
+    els.sigPreview.innerHTML = buildSignatureHtml(state);
+  }
+
+  els.name.addEventListener('input', e => { state.name = e.target.value; render(); });
+  els.title.addEventListener('input', e => { state.title = e.target.value; render(); });
+  els.email.addEventListener('input', e => { state.email = e.target.value; render(); });
+
+  els.photoBtn.addEventListener('click', () => els.photoInput.click());
+  els.recropBtn.addEventListener('click', () => { if (pendingImg) openCrop(pendingImg); });
+  els.removePhotoBtn.addEventListener('click', () => {
+    state.photo = null;
+    pendingImg = null;
+    els.photoPreview.innerHTML = '';
+    els.photoPreview.textContent = 'Sin foto';
+    els.recropBtn.hidden = true;
+    els.removePhotoBtn.hidden = true;
+    render();
+  });
+  els.photoInput.addEventListener('change', () => {
+    const file = els.photoInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => { pendingImg = img; openCrop(img); };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+    els.photoInput.value = '';
+  });
+
+  // --- crop modal: draggable, resizable circular selection over the full image ---
+  let dispW = 0, dispH = 0; // displayed image size inside the modal
+
+  function openCrop(img){
+    const scale = Math.min(MAX_STAGE / img.width, MAX_STAGE / img.height, 3);
+    dispW = img.width * scale;
+    dispH = img.height * scale;
+    els.cropImgEl.src = img.src;
+    els.cropImgEl.style.width = dispW + 'px';
+    els.cropImgEl.style.height = dispH + 'px';
+    els.cropStage.style.width = dispW + 'px';
+    els.cropStage.style.height = dispH + 'px';
+
+    box.size = Math.min(dispW, dispH) * 0.85;
+    box.left = (dispW - box.size) / 2;
+    box.top = (dispH - box.size) / 2;
+    drawBox();
+    els.cropOverlay.hidden = false;
+  }
+
+  function drawBox(){
+    els.cropBox.style.left = box.left + 'px';
+    els.cropBox.style.top = box.top + 'px';
+    els.cropBox.style.width = box.size + 'px';
+    els.cropBox.style.height = box.size + 'px';
+  }
+
+  function clampBox(){
+    box.size = Math.max(MIN_BOX, Math.min(box.size, dispW, dispH));
+    box.left = Math.min(Math.max(0, box.left), dispW - box.size);
+    box.top = Math.min(Math.max(0, box.top), dispH - box.size);
+  }
+
+  function onDragStart(e, mode){
+    dragMode = mode;
+    dragStart = { x: e.clientX, y: e.clientY, left: box.left, top: box.top, size: box.size };
+    e.target.setPointerCapture(e.pointerId);
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  els.cropBox.addEventListener('pointerdown', e => onDragStart(e, 'move'));
+  els.cropHandle.addEventListener('pointerdown', e => onDragStart(e, 'resize'));
+
+  function onDragMove(e){
+    if (!dragMode) return;
+    const dx = e.clientX - dragStart.x, dy = e.clientY - dragStart.y;
+    if (dragMode === 'move'){
+      box.left = Math.min(Math.max(0, dragStart.left + dx), dispW - box.size);
+      box.top = Math.min(Math.max(0, dragStart.top + dy), dispH - box.size);
+    } else if (dragMode === 'resize'){
+      const delta = Math.max(dx, dy); // grow from the bottom-right corner, keep square
+      const maxSize = Math.min(dispW - dragStart.left, dispH - dragStart.top);
+      box.size = Math.max(MIN_BOX, Math.min(dragStart.size + delta, maxSize));
+    }
+    drawBox();
+  }
+  function onDragEnd(){ dragMode = null; }
+  window.addEventListener('pointermove', onDragMove);
+  window.addEventListener('pointerup', onDragEnd);
+
+  els.cropCancel.addEventListener('click', () => { els.cropOverlay.hidden = true; });
+  els.cropApply.addEventListener('click', () => {
+    if (!pendingImg) return;
+    clampBox();
+    const naturalScale = pendingImg.width / dispW;
+    const sx = box.left * naturalScale;
+    const sy = box.top * naturalScale;
+    const ssize = box.size * naturalScale;
+    const OUT = 320;
+    const canvas = document.createElement('canvas');
+    canvas.width = OUT; canvas.height = OUT;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(pendingImg, sx, sy, ssize, ssize, 0, 0, OUT, OUT);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    state.photo = dataUrl;
+    els.photoPreview.innerHTML = `<img src="${dataUrl}" alt="Foto" />`;
+    els.recropBtn.hidden = false;
+    els.removePhotoBtn.hidden = false;
+    els.cropOverlay.hidden = true;
+    render();
+  });
+
+  function showStatus(msg, ok){
+    els.status.textContent = msg;
+    els.status.className = 'status show ' + (ok ? 'ok' : 'err');
+    setTimeout(() => { els.status.className = 'status'; }, 4500);
+  }
+
+  els.copyBtn.addEventListener('click', async () => {
+    if (!state.name || !state.email){
+      showStatus('Completá al menos tu nombre y tu email antes de copiar.', false);
+      return;
+    }
+    const html = buildSignatureHtml(state);
+    const plain = `${state.name}\n${state.title}\n${state.email}`;
+    try{
+      if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+        const item = new ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([plain], { type: 'text/plain' }),
+        });
+        await navigator.clipboard.write([item]);
+      } else {
+        const temp = document.createElement('div');
+        temp.contentEditable = 'true';
+        temp.style.position = 'fixed';
+        temp.style.left = '-9999px';
+        temp.innerHTML = html;
+        document.body.appendChild(temp);
+        const range = document.createRange();
+        range.selectNodeContents(temp);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        document.execCommand('copy');
+        sel.removeAllRanges();
+        document.body.removeChild(temp);
+      }
+      showStatus('Firma copiada. Pegala en Gmail con Ctrl/Cmd + V.', true);
+    } catch(err){
+      showStatus('No se pudo copiar automáticamente. Seleccioná la vista previa manualmente y copiá con Ctrl/Cmd + C.', false);
+    }
+  });
+
+  els.saveBtn.addEventListener('click', async () => {
+    if (!state.name || !state.title || !state.email){
+      showStatus('Completá nombre, cargo y email antes de guardar.', false);
+      return;
+    }
+    els.saveBtn.disabled = true;
+    try{
+      // "no-cors": Apps Script no siempre responde con headers CORS, así que
+      // el pedido se manda igual pero no podemos leer la respuesta — por eso
+      // asumimos éxito si fetch no tira una excepción de red.
+      await fetch(SHEET_WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          name: state.name,
+          title: state.title,
+          email: state.email,
+          date: new Date().toLocaleString('es-AR'),
+        }),
+      });
+      showStatus('Guardado en el registro del equipo.', true);
+    } catch(err){
+      showStatus('No se pudo guardar en el registro (revisá tu conexión). Tu firma igual se puede copiar y usar.', false);
+    } finally {
+      els.saveBtn.disabled = false;
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
