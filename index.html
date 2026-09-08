@@ -252,7 +252,7 @@
   const PURPLE = "#7E2F82";
   const ORCHID = "#A03FA3";
   const PHOTO_SIZE = 110;
-  const LOGO_WIDTH = 118;
+  const LOGO_WIDTH = 114;
 
   const state = { name:"", title:"", email:"", photo:null };
   let pendingImg = null; // Image object awaiting crop
@@ -304,7 +304,7 @@
     <td style="vertical-align:middle;">
       <div style="font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:700;color:${PURPLE};line-height:1.3;white-space:nowrap;">${name}</div>
       <div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:500;color:${ORCHID};line-height:1.4;max-width:260px;">${title}</div>
-      <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:400;color:#010101;line-height:1.5;white-space:nowrap;">${email}</div>
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:400;line-height:1.5;white-space:nowrap;"><a href="mailto:${email}" style="color:#010101;text-decoration:none;">${email}</a></div>
       <a href="https://buildyourcastle.ai/" style="display:inline-block;margin-top:8px;text-decoration:none;border:0;"><img src="${LOGO}" alt="Castle" width="${LOGO_WIDTH}" style="display:block;border:0;" /></a>
     </td>
   </tr>
