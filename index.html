@@ -84,11 +84,16 @@
 
   label{ display:block; font-size:13px; font-weight:600; color: var(--ink-soft); margin: 16px 0 6px; }
   label:first-of-type{ margin-top:0; }
-  input[type="text"], input[type="email"]{
+  input[type="text"], input[type="email"], select{
     width:100%; padding: 10px 12px; border-radius:10px; border:1px solid var(--border);
     background: var(--field-bg); color: var(--ink); font: inherit; font-size:14.5px;
   }
-  input[type="text"]:focus, input[type="email"]:focus{ outline: 2px solid var(--orchid); outline-offset:1px; }
+  select{ appearance:none; -webkit-appearance:none; cursor:pointer;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b5c76' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat:no-repeat; background-position: right 12px center; padding-right:34px;
+  }
+  input[type="text"]:focus, input[type="email"]:focus, select:focus{ outline: 2px solid var(--orchid); outline-offset:1px; }
+  .type-hint{ font-size:12.5px; color:var(--ink-soft); margin:6px 0 0; line-height:1.5; }
 
   .photo-row{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
   .photo-preview{
@@ -183,25 +188,46 @@
         <h2>Tus datos</h2>
         <p class="hint">Se usan solo para armar tu firma — no se guardan en ningún lado.</p>
 
+        <label for="fType">Tipo de firma</label>
+        <select id="fType">
+          <option value="ceo">Silvina</option>
+          <option value="team">Equipo</option>
+        </select>
+        <p class="type-hint" id="typeHint"></p>
+
         <label for="fName">Nombre y apellido</label>
         <input type="text" id="fName" placeholder="Ej: Silvina Moschini" />
 
         <label for="fTitle">Cargo</label>
         <input type="text" id="fTitle" placeholder="Ej: Founder & CEO" />
 
-        <label for="fEmail">Email</label>
-        <div style="display:flex;align-items:stretch;">
-          <input type="text" id="fEmail" placeholder="nombre" style="flex:1;min-width:0;border-top-right-radius:0;border-bottom-right-radius:0;" />
-          <div style="display:flex;align-items:center;padding:0 12px;border:1px solid var(--border);border-left:none;border-top-right-radius:10px;border-bottom-right-radius:10px;background:var(--field-bg);color:var(--ink-soft);font-size:14.5px;white-space:nowrap;">@buildyourcastle.ai</div>
+        <div id="rowEmail">
+          <label for="fEmail">Email</label>
+          <div style="display:flex;align-items:stretch;">
+            <input type="text" id="fEmail" placeholder="nombre" style="flex:1;min-width:0;border-top-right-radius:0;border-bottom-right-radius:0;" />
+            <div style="display:flex;align-items:center;padding:0 12px;border:1px solid var(--border);border-left:none;border-top-right-radius:10px;border-bottom-right-radius:10px;background:var(--field-bg);color:var(--ink-soft);font-size:14.5px;white-space:nowrap;">@buildyourcastle.ai</div>
+          </div>
         </div>
 
-        <label>Foto</label>
-        <div class="photo-row">
-          <div class="photo-preview" id="photoPreview">Sin foto</div>
-          <button type="button" class="file-btn" id="photoBtn">Subir foto</button>
-          <button type="button" class="file-btn secondary-file" id="recropBtn" hidden>Recortar de nuevo</button>
-          <button type="button" class="file-btn secondary-file" id="removePhotoBtn" hidden>Eliminar foto</button>
-          <input type="file" id="photoInput" accept="image/*" />
+        <div id="rowPhone">
+          <label for="fPhone">Teléfono</label>
+          <input type="text" id="fPhone" placeholder="Ej: +54 11 5555 5555" />
+        </div>
+
+        <div id="rowLinkedin">
+          <label for="fLinkedin">LinkedIn (URL del perfil)</label>
+          <input type="text" id="fLinkedin" placeholder="https://www.linkedin.com/in/tu-perfil" />
+        </div>
+
+        <div id="rowPhoto">
+          <label>Foto</label>
+          <div class="photo-row">
+            <div class="photo-preview" id="photoPreview">Sin foto</div>
+            <button type="button" class="file-btn" id="photoBtn">Subir foto</button>
+            <button type="button" class="file-btn secondary-file" id="recropBtn" hidden>Recortar de nuevo</button>
+            <button type="button" class="file-btn secondary-file" id="removePhotoBtn" hidden>Eliminar foto</button>
+            <input type="file" id="photoInput" accept="image/*" />
+          </div>
         </div>
 
         <div class="actions">
@@ -243,11 +269,15 @@
 <script>
 (function(){
   const LOGO = document.querySelector('.brand-line img').src;
-  const PURPLE = "#A03FA3"; // Power Purple — color principal de marca
-  const ORCHID = "#7E2F82"; // Deep Purple — acento secundario
-  const PHOTO_SIZE = 110;
-  const LOGO_WIDTH = 114;
+  const NAME_COLOR = "#7E2F82"; // Deep Purple — color del nombre
+  const TITLE_COLOR = "#A03FA3"; // Power Purple — color del cargo (firma Silvina)
+  const DATA_COLOR = "#1A1A1A"; // Core Black — cargo/teléfono/email de la firma de Equipo
+  const PHOTO_SIZE = 100;
+  const LOGO_WIDTH_CEO = 84;
+  const LOGO_WIDTH_TEAM = 62;
   const EMAIL_DOMAIN = "buildyourcastle.ai";
+  // Ícono "in" de LinkedIn en el color de marca, como badge junto al nombre (solo firma de Equipo).
+  const LI_BADGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAACxUlEQVR4nO3dvWtTURzG8Se3ebnYkIaEUEppqhIohS6GbI4iZncRN/8Hndz8OxzEoW4KTsVFOtpVSyjYDDXBQFsINC/W3CQOISVN77n39v5O1NM8n7Hn3vbw5XfS0JckghB2nu4Mw9z3vytvlyPXvSfwDTc1mkrQmL4XzVu4aX4hLa/FeY8H+Ddwrctw7tym8coEMp6aWxvPI0z+LgXk9PmbbmSpFkhtshWPsJAFcPrCGDfjBAoxoFCEx1eGEyjEgEIMKMSAQgwoxIBCDCjEgEIMKBTV/Qlz93IoPi8q1/df76P2uab7y/4znEAhBhRiQCEGFGJAIf48UIgTKKT9eeDflFxNYuX+CrJbWdhZG7FkDE7bQfe4i5OvJ6jv1tE97s50D9qPsOSJdNB7E+kENp9tYrm07LmXQW+A6scqDt8fBtt8CMZN4NLdJRRfFBFPxX2vtWIWCo8LiCfjqLytzGQ/Rj0Gpu6kUHpZChRvUv5RHrlibiZ7Mirg2oM1RO1wh2bjyYbm3YwYFVBicXUR6UJa++c17jEQAJxfDqofqmh8aeC8eQ47a2O9vI78w7znfZmtDJrfm1r3YlxAp+Ng79Uezn6cXXys0+ig8mb0TcIrYup2Svt+jDvCB+8OLsWbdPTpyPNeO2Nr349RAXutHuq7deV6+2cbA2egXI/e0n/gjAp4+u0Uw77H8/4h4LQd5fJCYkH7nowK2Kq1fK/p/+6rF6/9f0j+jArYa/V8r/Gc0BkwKqDX49vYcMiARmFAIQYUYkAhBhRiQCEGFGJAIQYUYkAhBhTin3YIcQKFGFCIAYUYUIgBhRhQiAGFGFCIAYUYUMgK87KXNFLeLkc4gUIMKGQB4V69dt6Nm3EChS4CcgqDm2xlqRbI3XQjHmGhKwE5hWpubTxj8fclI15D5XmEOY3+DfhmBAra3ozAzU2NGebE/QFdq885PV3JFgAAAABJRU5ErkJggg==";
 
   // El campo de email solo pide el usuario (lo que va antes del @); el
   // dominio de Castle se agrega solo. Si alguien pega igual su email
@@ -257,7 +287,7 @@
     return user ? `${user}@${EMAIL_DOMAIN}` : "";
   }
 
-  const state = { name:"", title:"", email:"", photo:null };
+  const state = { type:"ceo", name:"", title:"", email:"", phone:"", linkedin:"", photo:null };
   let pendingImg = null; // Image object awaiting crop
   const MAX_STAGE = 360; // max displayed size (px) of the image inside the crop modal
   const MIN_BOX = 60;    // smallest allowed crop selection (px, in displayed coordinates)
@@ -266,9 +296,17 @@
   let dragStart = { x:0, y:0, left:0, top:0, size:0 };
 
   const els = {
+    type: document.getElementById('fType'),
+    typeHint: document.getElementById('typeHint'),
+    rowEmail: document.getElementById('rowEmail'),
+    rowPhone: document.getElementById('rowPhone'),
+    rowLinkedin: document.getElementById('rowLinkedin'),
+    rowPhoto: document.getElementById('rowPhoto'),
     name: document.getElementById('fName'),
     title: document.getElementById('fTitle'),
     email: document.getElementById('fEmail'),
+    phone: document.getElementById('fPhone'),
+    linkedin: document.getElementById('fLinkedin'),
     photoInput: document.getElementById('photoInput'),
     photoBtn: document.getElementById('photoBtn'),
     recropBtn: document.getElementById('recropBtn'),
@@ -297,7 +335,7 @@
   // email — así que nunca lo autoconvierte en link azul, ni al pegarlo ni al
   // verlo en el correo ya enviado. No es un link de ningún tipo: es texto plano.
   function buildEmailDisplay(rawEmail){
-    const EMAIL_COLOR = "color:#010101;text-decoration:none;";
+    const EMAIL_COLOR = "color:#1A1A1A;text-decoration:none;";
     const value = rawEmail || "tu@buildyourcastle.ai";
     const at = value.indexOf('@');
     if (at === -1){
@@ -311,34 +349,84 @@
     return `<span style="${EMAIL_COLOR}">${local}</span><span style="${EMAIL_COLOR}">@</span>${domainHtml}`;
   }
 
-  function buildSignatureHtml(data){
+  // Firma de CEO: solo nombre, cargo y logo — sin ningún dato de contacto personal.
+  function buildCeoSignatureHtml(data){
+    const name = escapeHtml(data.name || "Tu nombre");
+    const title = escapeHtml(data.title || "Tu cargo");
+    return `<table cellpadding="0" cellspacing="0" role="presentation" style="font-family:Arial,Helvetica,sans-serif;border-collapse:collapse;">
+  <tr>
+    <td style="vertical-align:middle;">
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:700;color:${NAME_COLOR};line-height:1.3;white-space:nowrap;">${name}</div>
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:500;color:${TITLE_COLOR};line-height:1.4;max-width:260px;">${title}</div>
+      <a href="https://buildyourcastle.ai/" style="display:inline-block;margin-top:10px;text-decoration:none;border:0;"><img src="${LOGO}" alt="Castle" width="${LOGO_WIDTH_CEO}" style="display:block;border:0;" /></a>
+    </td>
+  </tr>
+</table>`;
+  }
+
+  // Firma de Equipo: foto, nombre con badge de LinkedIn, cargo, teléfono, email y logo (más chico).
+  function buildTeamSignatureHtml(data){
     const name = escapeHtml(data.name || "Tu nombre");
     const title = escapeHtml(data.title || "Tu cargo");
     const emailHtml = buildEmailDisplay(data.email);
+    const phone = escapeHtml(data.phone || "");
+    const linkedin = String(data.linkedin || "").trim();
     const photo = data.photo;
     const photoCell = photo
       ? `<img src="${photo}" width="${PHOTO_SIZE}" height="${PHOTO_SIZE}" style="display:block;width:${PHOTO_SIZE}px;height:${PHOTO_SIZE}px;border-radius:50%;object-fit:cover;" alt="${name}" />`
       : `<div style="width:${PHOTO_SIZE}px;height:${PHOTO_SIZE}px;border-radius:50%;background:#f1e2f7;"></div>`;
+    const liBadge = linkedin
+      ? `<a href="${escapeHtml(linkedin)}" style="display:inline-block;vertical-align:middle;margin-left:6px;text-decoration:none;border:0;line-height:0;"><img src="${LI_BADGE}" width="16" height="16" alt="LinkedIn" style="display:inline-block;border:0;border-radius:4px;" /></a>`
+      : "";
+    const phoneRow = phone
+      ? `<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:400;color:${DATA_COLOR};line-height:18px;white-space:nowrap;">M. ${phone}</div>`
+      : "";
+    const emailRow = data.email
+      ? `<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:400;line-height:18px;white-space:nowrap;">E. ${emailHtml}</div>`
+      : "";
     return `<table cellpadding="0" cellspacing="0" role="presentation" style="font-family:Arial,Helvetica,sans-serif;border-collapse:collapse;">
   <tr>
-    <td style="padding-right:20px;vertical-align:middle;">${photoCell}</td>
-    <td style="vertical-align:middle;">
-      <div style="font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:700;color:${PURPLE};line-height:1.3;white-space:nowrap;">${name}</div>
-      <div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:500;color:${ORCHID};line-height:1.4;max-width:260px;">${title}</div>
-      <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:400;line-height:1.5;white-space:nowrap;">${emailHtml}</div>
-      <a href="https://buildyourcastle.ai/" style="display:inline-block;margin-top:8px;text-decoration:none;border:0;"><img src="${LOGO}" alt="Castle" width="${LOGO_WIDTH}" style="display:block;border:0;" /></a>
+    <td style="padding-right:20px;vertical-align:top;">${photoCell}</td>
+    <td style="vertical-align:top;">
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:${NAME_COLOR};line-height:1.3;white-space:nowrap;margin-top:-2px;">${name}${liBadge}</div>
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:500;color:${DATA_COLOR};line-height:1.4;max-width:260px;margin-top:2px;">${title}</div>
+      <div style="height:8px;line-height:8px;font-size:0;">&nbsp;</div>
+      ${phoneRow}
+      ${emailRow}
+      <a href="https://buildyourcastle.ai/" style="display:inline-block;margin-top:10px;text-decoration:none;border:0;"><img src="${LOGO}" alt="Castle" width="${LOGO_WIDTH_TEAM}" style="display:block;border:0;" /></a>
     </td>
   </tr>
 </table>`;
+  }
+
+  function buildSignatureHtml(data){
+    return data.type === 'team' ? buildTeamSignatureHtml(data) : buildCeoSignatureHtml(data);
+  }
+
+  const TYPE_HINTS = {
+    ceo: "Firma minimalista: nombre, cargo y logo. Sin foto ni datos de contacto.",
+    team: "Firma completa: foto, nombre con LinkedIn, cargo, teléfono y email.",
+  };
+
+  function applyTypeVisibility(){
+    const isTeam = state.type === 'team';
+    els.rowEmail.hidden = !isTeam;
+    els.rowPhone.hidden = !isTeam;
+    els.rowLinkedin.hidden = !isTeam;
+    els.rowPhoto.hidden = !isTeam;
+    els.typeHint.textContent = TYPE_HINTS[state.type] || "";
   }
 
   function render(){
     els.sigPreview.innerHTML = buildSignatureHtml(state);
   }
 
+  els.type.addEventListener('change', e => { state.type = e.target.value; applyTypeVisibility(); render(); });
   els.name.addEventListener('input', e => { state.name = e.target.value; render(); });
   els.title.addEventListener('input', e => { state.title = e.target.value; render(); });
   els.email.addEventListener('input', e => { state.email = emailFromUser(e.target.value); render(); });
+  els.phone.addEventListener('input', e => { state.phone = e.target.value; render(); });
+  els.linkedin.addEventListener('input', e => { state.linkedin = e.target.value; render(); });
   // Si alguien pega su email completo (con "@buildyourcastle.ai" incluido),
   // al salir del campo se deja solo el usuario para que no quede duplicado
   // visualmente con el sufijo fijo de al lado.
@@ -461,12 +549,16 @@
   }
 
   els.copyBtn.addEventListener('click', async () => {
-    if (!state.name || !state.email){
-      showStatus('Completá al menos tu nombre y tu email antes de copiar.', false);
+    if (!state.name || (state.type === 'team' && !state.email)){
+      showStatus(state.type === 'team'
+        ? 'Completá al menos tu nombre y tu email antes de copiar.'
+        : 'Completá al menos tu nombre antes de copiar.', false);
       return;
     }
     const html = buildSignatureHtml(state);
-    const plain = `${state.name}\n${state.title}\n${state.email}`;
+    const plain = state.type === 'team'
+      ? [state.name, state.title, state.phone, state.email].filter(Boolean).join('\n')
+      : [state.name, state.title].filter(Boolean).join('\n');
     try{
       if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
         const item = new ClipboardItem({
@@ -496,6 +588,7 @@
     }
   });
 
+  applyTypeVisibility();
   render();
 })();
 </script>
