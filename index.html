@@ -190,7 +190,10 @@
         <input type="text" id="fTitle" placeholder="Ej: Founder & CEO" />
 
         <label for="fEmail">Email</label>
-        <input type="email" id="fEmail" placeholder="Ej: nombre@buildyourcastle.ai" />
+        <div style="display:flex;align-items:stretch;">
+          <input type="text" id="fEmail" placeholder="nombre" style="flex:1;min-width:0;border-top-right-radius:0;border-bottom-right-radius:0;" />
+          <div style="display:flex;align-items:center;padding:0 12px;border:1px solid var(--border);border-left:none;border-top-right-radius:10px;border-bottom-right-radius:10px;background:var(--field-bg);color:var(--ink-soft);font-size:14.5px;white-space:nowrap;">@buildyourcastle.ai</div>
+        </div>
 
         <label>Foto</label>
         <div class="photo-row">
@@ -253,6 +256,15 @@
   const ORCHID = "#A03FA3";
   const PHOTO_SIZE = 110;
   const LOGO_WIDTH = 114;
+  const EMAIL_DOMAIN = "buildyourcastle.ai";
+
+  // El campo de email solo pide el usuario (lo que va antes del @); el
+  // dominio de Castle se agrega solo. Si alguien pega igual su email
+  // completo por costumbre, se recorta todo lo que venga después del "@".
+  function emailFromUser(raw){
+    const user = String(raw || "").trim().split('@')[0];
+    return user ? `${user}@${EMAIL_DOMAIN}` : "";
+  }
 
   const state = { name:"", title:"", email:"", photo:null };
   let pendingImg = null; // Image object awaiting crop
@@ -338,7 +350,14 @@
 
   els.name.addEventListener('input', e => { state.name = e.target.value; render(); });
   els.title.addEventListener('input', e => { state.title = e.target.value; render(); });
-  els.email.addEventListener('input', e => { state.email = e.target.value; render(); });
+  els.email.addEventListener('input', e => { state.email = emailFromUser(e.target.value); render(); });
+  // Si alguien pega su email completo (con "@buildyourcastle.ai" incluido),
+  // al salir del campo se deja solo el usuario para que no quede duplicado
+  // visualmente con el sufijo fijo de al lado.
+  els.email.addEventListener('blur', e => {
+    const user = e.target.value.trim().split('@')[0];
+    e.target.value = user;
+  });
 
   els.photoBtn.addEventListener('click', () => els.photoInput.click());
   els.recropBtn.addEventListener('click', () => { if (pendingImg) openCrop(pendingImg); });
