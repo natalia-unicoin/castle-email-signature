@@ -206,7 +206,6 @@
 
         <div class="actions">
           <button class="primary" id="copyBtn" type="button">Copiar firma</button>
-          <button class="secondary" id="saveBtn" type="button" hidden>Guardar en el registro del equipo</button>
         </div>
         <div class="status" id="statusMsg"></div>
 
@@ -243,17 +242,9 @@
 
 <script>
 (function(){
-  // ── Registro en Google Sheets (opcional) ──────────────────────────────
-  // 1. Creá una Google Sheet con la fila de encabezado: Fecha | Nombre | Cargo | Email
-  // 2. Extensiones → Apps Script, pegá el código que te dimos (doPost) y guardá.
-  // 3. Implementar → Nueva implementación → tipo "Aplicación web".
-  //    Ejecutar como: Yo. Quién tiene acceso: Cualquier usuario.
-  // 4. Copiá la URL que te da (termina en /exec) y pegala acá abajo:
-  const SHEET_WEBHOOK_URL = "https://script.google.com/a/macros/unicoin.com/s/AKfycbxCHsE73Gc62osYjFwznGsmqih1g8_jdC51uWkGo7vlJk7X_0AfJlgM7JxTt-KjEerDQg/exec";
-
   const LOGO = document.querySelector('.brand-line img').src;
-  const PURPLE = "#7E2F82";
-  const ORCHID = "#A03FA3";
+  const PURPLE = "#A03FA3"; // Power Purple — color principal de marca
+  const ORCHID = "#7E2F82"; // Deep Purple — acento secundario
   const PHOTO_SIZE = 110;
   const LOGO_WIDTH = 114;
   const EMAIL_DOMAIN = "buildyourcastle.ai";
@@ -292,11 +283,8 @@
     cropApply: document.getElementById('cropApply'),
     sigPreview: document.getElementById('sigPreview'),
     copyBtn: document.getElementById('copyBtn'),
-    saveBtn: document.getElementById('saveBtn'),
     status: document.getElementById('statusMsg'),
   };
-
-  if (SHEET_WEBHOOK_URL) els.saveBtn.hidden = false;
 
   function escapeHtml(s){
     return String(s || "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -505,35 +493,6 @@
       showStatus('Firma copiada. Pegala en Gmail con Ctrl/Cmd + V.', true);
     } catch(err){
       showStatus('No se pudo copiar automáticamente. Seleccioná la vista previa manualmente y copiá con Ctrl/Cmd + C.', false);
-    }
-  });
-
-  els.saveBtn.addEventListener('click', async () => {
-    if (!state.name || !state.title || !state.email){
-      showStatus('Completá nombre, cargo y email antes de guardar.', false);
-      return;
-    }
-    els.saveBtn.disabled = true;
-    try{
-      // "no-cors": Apps Script no siempre responde con headers CORS, así que
-      // el pedido se manda igual pero no podemos leer la respuesta — por eso
-      // asumimos éxito si fetch no tira una excepción de red.
-      await fetch(SHEET_WEBHOOK_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({
-          name: state.name,
-          title: state.title,
-          email: state.email,
-          date: new Date().toLocaleString('es-AR'),
-        }),
-      });
-      showStatus('Guardado en el registro del equipo.', true);
-    } catch(err){
-      showStatus('No se pudo guardar en el registro (revisá tu conexión). Tu firma igual se puede copiar y usar.', false);
-    } finally {
-      els.saveBtn.disabled = false;
     }
   });
 
