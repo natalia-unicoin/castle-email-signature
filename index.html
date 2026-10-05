@@ -215,11 +215,6 @@
           <input type="text" id="fPhone" placeholder="Ej: +54 11 5555 5555" />
         </div>
 
-        <div id="rowLinkedin">
-          <label for="fLinkedin">LinkedIn (opcional, URL del perfil)</label>
-          <input type="text" id="fLinkedin" placeholder="https://www.linkedin.com/in/tu-perfil" />
-        </div>
-
         <div id="rowPhoto">
           <label>Foto</label>
           <div class="photo-row">
@@ -279,8 +274,6 @@
   const LOGO_WIDTH = 60;
   const LOGO_HEIGHT = Math.round(LOGO_WIDTH * 52 / 258); // proporción real del logo (258×52): tamaño fijo, siempre igual
   const EMAIL_DOMAIN = "buildyourcastle.ai";
-  // Ícono oficial de LinkedIn (provisto por el usuario), como badge junto al nombre (solo firma de Equipo).
-  const LI_BADGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAACXBIWXMAABCcAAAQnAEmzTo0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAATZJREFUeAHNlMFRwzAQRf9qAhw4mA4QHSQ3m8BM6CAdQG7gHBIqiEvwxTmbDqACDmBkbi4hJZgCkkXSjEHM4Ewc+5B30a6987W7kpay8HMBcIQWECG+TPxHysKc0QHimC/E3y2QMvMT9qTnCg0Tf2JMnW2plxka8psZ48v57mEPeo49y6a5J5hWa/CY0BxXrNQnIdfEUrC1wYTC/NC+1P6ZbsWz8YkxMrG1Yvp4C92zG2N/PKiUBJ1X/vs0n58enaSDeFBW8W+higRo4YoJ7MBV4seukOF6GUSmmn8z24a6V3Ij6BW2NJ4Ml0Fqq2F+YaLbRpltBO7w0yMe18XtJOZCJLzOxLZxuGLu1CirS6mf1gjOJdVhfTD3a+KkzUpPjW5HUJuRU0FERRAHK/ue1VxJtMAImfUb2YVoRDYi/Z4AAAAASUVORK5CYII=";
 
   // El campo de email solo pide el usuario (lo que va antes del @); el
   // dominio de Castle se agrega solo. Si alguien pega igual su email
@@ -290,7 +283,7 @@
     return user ? `${user}@${EMAIL_DOMAIN}` : "";
   }
 
-  const state = { name:"", title:"", email:"", phone:"", linkedin:"", photo:null };
+  const state = { name:"", title:"", email:"", phone:"", photo:null };
   let pendingImg = null; // Image object awaiting crop
   const MAX_STAGE = 360; // max displayed size (px) of the image inside the crop modal
   const MIN_BOX = 60;    // smallest allowed crop selection (px, in displayed coordinates)
@@ -301,13 +294,11 @@
   const els = {
     rowEmail: document.getElementById('rowEmail'),
     rowPhone: document.getElementById('rowPhone'),
-    rowLinkedin: document.getElementById('rowLinkedin'),
     rowPhoto: document.getElementById('rowPhoto'),
     name: document.getElementById('fName'),
     title: document.getElementById('fTitle'),
     email: document.getElementById('fEmail'),
     phone: document.getElementById('fPhone'),
-    linkedin: document.getElementById('fLinkedin'),
     photoInput: document.getElementById('photoInput'),
     photoBtn: document.getElementById('photoBtn'),
     recropBtn: document.getElementById('recropBtn'),
@@ -350,7 +341,7 @@
     return `<span style="${EMAIL_COLOR}">${local}</span><span style="${EMAIL_COLOR}">@</span>${domainHtml}`;
   }
 
-  // Firma única: foto (obligatoria; en la vista previa se ve un círculo hasta que se sube), nombre + badge de LinkedIn (si hay), cargo,
+  // Firma única: foto (obligatoria; en la vista previa se ve un círculo hasta que se sube), nombre, cargo,
   // teléfono (si hay), email y logo. Lo que no se completa, no se muestra.
   // Tamaños pensados para el "Normal" de Gmail (13px): datos en 13px, nombre y cargo 1pt más.
   function buildSignatureHtml(data){
@@ -359,13 +350,9 @@
     const title = escapeHtml(data.title || "Tu cargo");
     const emailHtml = buildEmailDisplay(data.email);
     const phone = escapeHtml(data.phone || "");
-    const linkedin = String(data.linkedin || "").trim();
     const photoCell = data.photo
       ? `<td style="padding-right:16px;vertical-align:top;"><img src="${data.photo}" width="${PHOTO_SIZE}" height="${PHOTO_SIZE}" style="display:block;width:${PHOTO_SIZE}px;height:${PHOTO_SIZE}px;border-radius:50%;object-fit:cover;" alt="${name}" /></td>`
       : `<td style="padding-right:16px;vertical-align:top;"><div style="width:${PHOTO_SIZE}px;height:${PHOTO_SIZE}px;border-radius:50%;background:#f1e2f7;"></div></td>`;
-    const liBadge = linkedin
-      ? `<a href="${escapeHtml(linkedin)}" style="display:inline-block;vertical-align:middle;margin-left:6px;text-decoration:none;border:0;line-height:0;"><img src="${LI_BADGE}" width="16" height="16" alt="LinkedIn" style="display:inline-block;border:0;" /></a>`
-      : "";
     const phoneRow = phone
       ? `<div style="${FONT}font-size:13px;font-weight:400;color:${DATA_COLOR};line-height:1.3;white-space:nowrap;margin-top:2px;">${phone}</div>`
       : "";
@@ -376,7 +363,7 @@
   <tr>
     ${photoCell}
     <td style="vertical-align:top;">
-      <div style="${FONT}font-size:14px;font-weight:700;color:${NAME_COLOR};line-height:1.3;white-space:nowrap;margin-top:0;">${name}${liBadge}</div>
+      <div style="${FONT}font-size:14px;font-weight:700;color:${NAME_COLOR};line-height:1.3;white-space:nowrap;margin-top:0;">${name}</div>
       <div style="${FONT}font-size:14px;font-weight:500;color:${TITLE_COLOR};line-height:1.3;max-width:260px;margin-top:2px;">${title}</div>
       ${phoneRow}
       ${emailRow}
@@ -394,7 +381,6 @@
   els.title.addEventListener('input', e => { state.title = e.target.value; render(); });
   els.email.addEventListener('input', e => { state.email = emailFromUser(e.target.value); render(); });
   els.phone.addEventListener('input', e => { state.phone = e.target.value; render(); });
-  els.linkedin.addEventListener('input', e => { state.linkedin = e.target.value; render(); });
   // Si alguien pega su email completo (con "@buildyourcastle.ai" incluido),
   // al salir del campo se deja solo el usuario para que no quede duplicado
   // visualmente con el sufijo fijo de al lado.
