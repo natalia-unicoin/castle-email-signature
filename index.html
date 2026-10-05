@@ -277,6 +277,7 @@
   const DATA_COLOR = "#1A1A1A"; // Core Black — cargo/teléfono/email de la firma de Equipo
   const PHOTO_SIZE = 100;
   const LOGO_WIDTH = 60;
+  const LOGO_HEIGHT = Math.round(LOGO_WIDTH * 52 / 258); // proporción real del logo (258×52): tamaño fijo, siempre igual
   const EMAIL_DOMAIN = "buildyourcastle.ai";
   // Ícono oficial de LinkedIn (provisto por el usuario), como badge junto al nombre (solo firma de Equipo).
   const LI_BADGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAACXBIWXMAABCcAAAQnAEmzTo0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAATZJREFUeAHNlMFRwzAQRf9qAhw4mA4QHSQ3m8BM6CAdQG7gHBIqiEvwxTmbDqACDmBkbi4hJZgCkkXSjEHM4Ewc+5B30a6987W7kpay8HMBcIQWECG+TPxHysKc0QHimC/E3y2QMvMT9qTnCg0Tf2JMnW2plxka8psZ48v57mEPeo49y6a5J5hWa/CY0BxXrNQnIdfEUrC1wYTC/NC+1P6ZbsWz8YkxMrG1Yvp4C92zG2N/PKiUBJ1X/vs0n58enaSDeFBW8W+higRo4YoJ7MBV4seukOF6GUSmmn8z24a6V3Ij6BW2NJ4Ml0Fqq2F+YaLbRpltBO7w0yMe18XtJOZCJLzOxLZxuGLu1CirS6mf1gjOJdVhfTD3a+KkzUpPjW5HUJuRU0FERRAHK/ue1VxJtMAImfUb2YVoRDYi/Z4AAAAASUVORK5CYII=";
@@ -379,7 +380,7 @@
       <div style="${FONT}font-size:14px;font-weight:500;color:${TITLE_COLOR};line-height:1.3;max-width:260px;margin-top:2px;">${title}</div>
       ${phoneRow}
       ${emailRow}
-      <a href="https://buildyourcastle.ai/" style="display:inline-block;margin-top:6px;text-decoration:none;border:0;"><img src="${LOGO}" alt="Castle" width="${LOGO_WIDTH}" style="display:block;border:0;" /></a>
+      <a href="https://buildyourcastle.ai/" style="display:inline-block;margin-top:6px;text-decoration:none;border:0;"><img src="${LOGO}" alt="Castle" width="${LOGO_WIDTH}" height="${LOGO_HEIGHT}" style="display:block;border:0;width:${LOGO_WIDTH}px;height:${LOGO_HEIGHT}px;max-width:none;min-width:${LOGO_WIDTH}px;" /></a>
     </td>
   </tr>
 </table>`;
